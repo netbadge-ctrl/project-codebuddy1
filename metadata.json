@@ -1,0 +1,6 @@
+{
+  "name": "项目管理工具",
+  "description": "一个交互式项目管理仪表盘，使用React和Tailwind CSS构建。它具有一个详细的表格视图，支持行内创建和编辑项目、管理带有独立排期的团队角色，并跟踪关键业务指标如OKR和项目状态。",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
