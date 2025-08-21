@@ -258,7 +258,7 @@ const ProjectOverview: React.FC = () => {
     onSelectionChange 
   }: {
     title: string;
-    options: string[] | { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } };
+    options: readonly string[] | { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } };
     selectedValues: string[];
     onSelectionChange: (values: string[]) => void;
   }) => {
@@ -398,7 +398,7 @@ const ProjectOverview: React.FC = () => {
           {/* 状态筛选 */}
           <MultiSelectFilter
             title="状态"
-            options={PROJECT_STATUSES}
+            options={[...PROJECT_STATUSES]}
             selectedValues={statusFilter}
             onSelectionChange={setStatusFilter}
           />
