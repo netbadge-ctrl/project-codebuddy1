@@ -1,26 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Search, Filter, Plus, MoreHorizontal, Eye, MessageCircle, History, Trash2 } from 'lucide-react';
+import { Search, Plus, MoreHorizontal, Eye, MessageCircle, History, Trash2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Checkbox } from './ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,8 +50,8 @@ const mockOKRSets = [
 
 const ProjectOverview: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
   const [selectedKRs, setSelectedKRs] = useState<string[]>([]);
 
   // 获取所有KR选项，按O分组
@@ -93,7 +78,7 @@ const ProjectOverview: React.FC = () => {
     return groupedOptions;
   }, []);
 
-  // 项目数据 - 使用新的状态定义
+  // 项目数据 - 添加进展和问题字段
   const [projects, setProjects] = useState([
     {
       id: 1,
@@ -102,14 +87,16 @@ const ProjectOverview: React.FC = () => {
       status: '开发中' as ProjectStatus,
       priority: '部门OKR相关',
       priorityColor: 'bg-red-100 text-red-800',
+      thisWeekProgress: '完成用户画像分析，开始A/B测试方案设计',
+      thisWeekIssues: '数据接口延迟，影响测试进度',
+      lastWeekProgress: '完成需求调研，确定技术方案',
+      lastWeekIssues: '跨部门协调困难，会议较多',
       pm: '张三',
       backend: '李四, 赵六',
       frontend: '孙七',
       testing: '陈十一',
       proposalDate: '2025-06-21',
       launchDate: '2025-09-19',
-      followers: 5,
-      comments: 12,
       relatedKRs: ['kr1_1', 'kr1_2'],
     },
     {
@@ -119,14 +106,16 @@ const ProjectOverview: React.FC = () => {
       status: '测试中' as ProjectStatus,
       priority: '部门OKR相关',
       priorityColor: 'bg-red-100 text-red-800',
+      thisWeekProgress: '完成核心模块测试，修复3个关键bug',
+      thisWeekIssues: '性能测试发现内存泄漏问题',
+      lastWeekProgress: '完成集成测试，部署到测试环境',
+      lastWeekIssues: '测试环境不稳定，影响测试效率',
       pm: '李四',
       backend: '张三, 周八',
       frontend: '李四',
       testing: '赵六',
       proposalDate: '2025-04-22',
       launchDate: '2025-09-09',
-      followers: 8,
-      comments: 23,
       relatedKRs: ['kr2_1'],
     },
     {
@@ -136,66 +125,17 @@ const ProjectOverview: React.FC = () => {
       status: '需求讨论' as ProjectStatus,
       priority: '个人OKR相关',
       priorityColor: 'bg-yellow-100 text-yellow-800',
+      thisWeekProgress: '完成原型设计评审，确定技术架构',
+      thisWeekIssues: '运营团队反馈需求变更较多',
+      lastWeekProgress: '收集运营团队需求，分析现有系统痛点',
+      lastWeekIssues: '需求收集时间较长，各部门意见不统一',
       pm: '王五, 张三',
       backend: '赵六',
       frontend: '孙七',
       testing: '卫十二',
       proposalDate: '2025-07-11',
       launchDate: '2025-10-09',
-      followers: 3,
-      comments: 8,
       relatedKRs: ['kr3_1', 'kr3_2'],
-    },
-    {
-      id: 4,
-      name: 'AI智能客服机器人',
-      businessProblem: '客服人力成本高，响应速度慢，需要AI辅助提升服务效率',
-      status: '开发中' as ProjectStatus,
-      priority: '临时重要需求',
-      priorityColor: 'bg-yellow-100 text-yellow-800',
-      pm: '王五',
-      backend: '周八',
-      frontend: '孙七',
-      testing: '卫十二',
-      proposalDate: '2025-07-11',
-      launchDate: '2025-10-09',
-      followers: 6,
-      comments: 15,
-      relatedKRs: ['kr3_1'],
-    },
-    {
-      id: 5,
-      name: '官网2024版改版',
-      businessProblem: '官网设计过时，用户体验差，影响品牌形象和转化率',
-      status: '待测试' as ProjectStatus,
-      priority: '日常需求',
-      priorityColor: 'bg-blue-100 text-blue-800',
-      pm: '张三',
-      backend: '周八',
-      frontend: '孙七',
-      testing: '陈十一',
-      proposalDate: '2025-07-01',
-      launchDate: '2025-08-30',
-      followers: 4,
-      comments: 7,
-      relatedKRs: ['kr1_2'],
-    },
-    {
-      id: 6,
-      name: '支付系统重构',
-      businessProblem: '支付成功率低，用户投诉多，需要重构提升稳定性',
-      status: '已上线' as ProjectStatus,
-      priority: '部门OKR相关',
-      priorityColor: 'bg-red-100 text-red-800',
-      pm: '李四',
-      backend: '赵六',
-      frontend: '孙七',
-      testing: '陈十一',
-      proposalDate: '2025-04-22',
-      launchDate: '2025-08-15',
-      followers: 7,
-      comments: 18,
-      relatedKRs: ['kr2_1', 'kr2_2'],
     },
   ]);
 
@@ -206,9 +146,7 @@ const ProjectOverview: React.FC = () => {
 
   // 模拟保存到数据库的函数
   const saveToDatabase = async (projectId: number, field: string, value: string) => {
-    // 这里应该调用实际的API
     console.log(`保存项目 ${projectId} 的 ${field} 字段为: ${value}`);
-    // 模拟API调用延迟
     await new Promise(resolve => setTimeout(resolve, 100));
   };
 
@@ -224,17 +162,14 @@ const ProjectOverview: React.FC = () => {
     
     const { projectId, field } = editingCell;
     
-    // 更新本地状态
     setProjects(prev => prev.map(project => 
       project.id === projectId 
         ? { ...project, [field]: editingValue }
         : project
     ));
 
-    // 保存到数据库
     await saveToDatabase(projectId, field, editingValue);
     
-    // 清除编辑状态
     setEditingCell(null);
     setEditingValue('');
   };
@@ -315,7 +250,7 @@ const ProjectOverview: React.FC = () => {
     );
   };
 
-  // 多选筛选器组件
+  // 通用多选筛选器组件
   const MultiSelectFilter = ({ 
     title, 
     options, 
@@ -323,19 +258,24 @@ const ProjectOverview: React.FC = () => {
     onSelectionChange 
   }: {
     title: string;
-    options: { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } };
+    options: string[] | { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } };
     selectedValues: string[];
     onSelectionChange: (values: string[]) => void;
   }) => {
-    // 计算所有可选值
+    const isKROptions = typeof options === 'object' && !Array.isArray(options);
+    
     const getAllValues = () => {
-      const allKRs: string[] = [];
-      Object.values(options).forEach(group => {
-        group.keyResults.forEach(kr => {
-          allKRs.push(kr.value);
+      if (isKROptions) {
+        const allKRs: string[] = [];
+        Object.values(options as { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } }).forEach(group => {
+          group.keyResults.forEach(kr => {
+            allKRs.push(kr.value);
+          });
         });
-      });
-      return allKRs;
+        return allKRs;
+      } else {
+        return options as string[];
+      }
     };
 
     const allValues = getAllValues();
@@ -384,28 +324,43 @@ const ProjectOverview: React.FC = () => {
               </div>
             </div>
             <div className="space-y-3 max-h-48 overflow-y-auto">
-              {Object.entries(options).map(([okrId, group]) => (
-                <div key={okrId} className="space-y-2">
-                  <div className="font-medium text-sm text-gray-900 border-b border-gray-200 pb-1">
-                    O: {group.objective}
+              {isKROptions ? (
+                Object.entries(options as { [key: string]: { objective: string; keyResults: { value: string; label: string }[] } }).map(([okrId, group]) => (
+                  <div key={okrId} className="space-y-2">
+                    <div className="font-medium text-sm text-gray-900 border-b border-gray-200 pb-1">
+                      O: {group.objective}
+                    </div>
+                    <div className="space-y-2 ml-2">
+                      {group.keyResults.map(kr => (
+                        <div key={kr.value} className="flex items-start space-x-2">
+                          <Checkbox
+                            id={kr.value}
+                            checked={selectedValues.includes(kr.value)}
+                            onCheckedChange={() => toggleOption(kr.value)}
+                            className="mt-0.5"
+                          />
+                          <label htmlFor={kr.value} className="text-sm cursor-pointer flex-1 text-gray-700">
+                            KR: {kr.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2 ml-2">
-                    {group.keyResults.map(kr => (
-                      <div key={kr.value} className="flex items-start space-x-2">
-                        <Checkbox
-                          id={kr.value}
-                          checked={selectedValues.includes(kr.value)}
-                          onCheckedChange={() => toggleOption(kr.value)}
-                          className="mt-0.5"
-                        />
-                        <label htmlFor={kr.value} className="text-sm cursor-pointer flex-1 text-gray-700">
-                          KR: {kr.label}
-                        </label>
-                      </div>
-                    ))}
+                ))
+              ) : (
+                (options as string[]).map(option => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={option}
+                      checked={selectedValues.includes(option)}
+                      onCheckedChange={() => toggleOption(option)}
+                    />
+                    <label htmlFor={option} className="text-sm cursor-pointer flex-1">
+                      {option}
+                    </label>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </PopoverContent>
@@ -416,15 +371,16 @@ const ProjectOverview: React.FC = () => {
   // 筛选项目
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-    const matchesPriority = priorityFilter === 'all' || project.priority === priorityFilter;
+    const matchesStatus = statusFilter.length === 0 || statusFilter.includes(project.status);
+    const matchesPriority = priorityFilter.length === 0 || priorityFilter.includes(project.priority);
+    const matchesKRs = selectedKRs.length === 0 || selectedKRs.some(kr => project.relatedKRs.includes(kr));
     
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesKRs;
   });
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* 简化的控制区 */}
+      {/* 控制区 */}
       <div className="flex items-center justify-between mb-6">
         {/* 筛选栏 */}
         <div className="flex flex-wrap gap-4">
@@ -440,31 +396,20 @@ const ProjectOverview: React.FC = () => {
           </div>
 
           {/* 状态筛选 */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="项目状态" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              {PROJECT_STATUSES.map(status => (
-                <SelectItem key={status} value={status}>{status}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MultiSelectFilter
+            title="状态"
+            options={PROJECT_STATUSES}
+            selectedValues={statusFilter}
+            onSelectionChange={setStatusFilter}
+          />
 
           {/* 优先级筛选 */}
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="优先级" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部优先级</SelectItem>
-              <SelectItem value="部门OKR相关">部门OKR相关</SelectItem>
-              <SelectItem value="个人OKR相关">个人OKR相关</SelectItem>
-              <SelectItem value="临时重要需求">临时重要需求</SelectItem>
-              <SelectItem value="日常需求">日常需求</SelectItem>
-            </SelectContent>
-          </Select>
+          <MultiSelectFilter
+            title="优先级"
+            options={['部门OKR相关', '个人OKR相关', '临时重要需求', '日常需求']}
+            selectedValues={priorityFilter}
+            onSelectionChange={setPriorityFilter}
+          />
 
           {/* KR筛选 */}
           <MultiSelectFilter
@@ -485,14 +430,16 @@ const ProjectOverview: React.FC = () => {
               status: '未开始' as ProjectStatus,
               priority: '日常需求',
               priorityColor: 'bg-blue-100 text-blue-800',
+              thisWeekProgress: '',
+              thisWeekIssues: '',
+              lastWeekProgress: '',
+              lastWeekIssues: '',
               pm: '',
               backend: '',
               frontend: '',
               testing: '',
               proposalDate: '',
               launchDate: '',
-              followers: 0,
-              comments: 0,
               relatedKRs: [],
             };
             setProjects([newProject, ...projects]);
@@ -506,173 +453,182 @@ const ProjectOverview: React.FC = () => {
         </Button>
       </div>
 
-      {/* 项目表格 */}
+      {/* 项目表格 - 使用单一表格避免错行 */}
       <Card className="bg-white">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="w-48">项目名称</TableHead>
-                <TableHead className="w-64">解决的业务问题</TableHead>
-                <TableHead className="w-32">状态</TableHead>
-                <TableHead className="w-32">优先级</TableHead>
-                <TableHead className="w-24">产品</TableHead>
-                <TableHead className="w-32">后端</TableHead>
-                <TableHead className="w-24">前端</TableHead>
-                <TableHead className="w-24">测试</TableHead>
-                <TableHead className="w-28">提出时间</TableHead>
-                <TableHead className="w-28">上线时间</TableHead>
-                <TableHead className="w-20 text-center">关注</TableHead>
-                <TableHead className="w-20 text-center">评论</TableHead>
-                <TableHead className="w-20">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProjects.map((project) => (
-                <TableRow key={project.id} className="hover:bg-gray-50">
-                  {/* 项目名称 */}
-                  <TableCell className="w-48 font-medium">
-                    <EditableCell
-                      projectId={project.id}
-                      field="name"
-                      value={project.name}
-                      className="text-blue-600 font-medium"
-                    />
-                  </TableCell>
-                  
-                  {/* 解决的业务问题 */}
-                  <TableCell className="w-64">
-                    <EditableCell
-                      projectId={project.id}
-                      field="businessProblem"
-                      value={project.businessProblem}
-                      className="text-gray-700"
-                      multiline
-                    />
-                  </TableCell>
-                  
-                  {/* 状态 */}
-                  <TableCell className="w-32">
-                    <Badge className={STATUS_COLORS[project.status]}>
-                      {project.status}
-                    </Badge>
-                  </TableCell>
-                  
-                  {/* 优先级 */}
-                  <TableCell className="w-32">
-                    <Badge className={project.priorityColor}>
-                      {project.priority}
-                    </Badge>
-                  </TableCell>
-                  
-                  {/* 产品 */}
-                  <TableCell className="w-24">
-                    <EditableCell
-                      projectId={project.id}
-                      field="pm"
-                      value={project.pm}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 后端 */}
-                  <TableCell className="w-32">
-                    <EditableCell
-                      projectId={project.id}
-                      field="backend"
-                      value={project.backend}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 前端 */}
-                  <TableCell className="w-24">
-                    <EditableCell
-                      projectId={project.id}
-                      field="frontend"
-                      value={project.frontend}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 测试 */}
-                  <TableCell className="w-24">
-                    <EditableCell
-                      projectId={project.id}
-                      field="testing"
-                      value={project.testing}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 提出时间 */}
-                  <TableCell className="w-28">
-                    <EditableCell
-                      projectId={project.id}
-                      field="proposalDate"
-                      value={project.proposalDate}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 上线时间 */}
-                  <TableCell className="w-28">
-                    <EditableCell
-                      projectId={project.id}
-                      field="launchDate"
-                      value={project.launchDate}
-                      className="text-sm text-gray-600"
-                    />
-                  </TableCell>
-                  
-                  {/* 关注 */}
-                  <TableCell className="w-20 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Eye className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{project.followers}</span>
-                    </div>
-                  </TableCell>
-                  
-                  {/* 评论 */}
-                  <TableCell className="w-20 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <MessageCircle className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{project.comments}</span>
-                    </div>
-                  </TableCell>
-                  
-                  {/* 操作 */}
-                  <TableCell className="w-20">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Eye className="w-4 h-4 mr-2" />
-                          查看详情
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <MessageCircle className="w-4 h-4 mr-2" />
-                          添加评论
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <History className="w-4 h-4 mr-2" />
-                          变更记录
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          删除项目
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b">
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-48">项目名称</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-64">解决的业务问题</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-32">状态</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-36">优先级</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-56">本周进展</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-56">本周问题</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-56">上周进展</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-56">上周问题</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-28">产品</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-40">后端</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-28">前端</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-28">测试</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-32">提出时间</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-32">上线时间</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-24">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project, index) => (
+                  <tr key={project.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
+                    <td className="px-4 py-3 w-48">
+                      <EditableCell
+                        projectId={project.id}
+                        field="name"
+                        value={project.name}
+                        className="text-blue-600 font-medium"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-64">
+                      <EditableCell
+                        projectId={project.id}
+                        field="businessProblem"
+                        value={project.businessProblem}
+                        className="text-gray-700"
+                        multiline
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-32">
+                      <Badge className={STATUS_COLORS[project.status]}>
+                        {project.status}
+                      </Badge>
+                    </td>
+                    
+                    <td className="px-4 py-3 w-36">
+                      <Badge className={project.priorityColor}>
+                        {project.priority}
+                      </Badge>
+                    </td>
+                    
+                    <td className="px-4 py-3 w-56">
+                      <EditableCell
+                        projectId={project.id}
+                        field="thisWeekProgress"
+                        value={project.thisWeekProgress}
+                        className="text-sm text-gray-700"
+                        multiline
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-56">
+                      <EditableCell
+                        projectId={project.id}
+                        field="thisWeekIssues"
+                        value={project.thisWeekIssues}
+                        className="text-sm text-red-600"
+                        multiline
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-56">
+                      <div className="text-sm text-gray-500 p-1">
+                        {project.lastWeekProgress || '暂无记录'}
+                      </div>
+                    </td>
+                    
+                    <td className="px-4 py-3 w-56">
+                      <div className="text-sm text-gray-500 p-1">
+                        {project.lastWeekIssues || '暂无记录'}
+                      </div>
+                    </td>
+                    
+                    <td className="px-4 py-3 w-28">
+                      <EditableCell
+                        projectId={project.id}
+                        field="pm"
+                        value={project.pm}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-40">
+                      <EditableCell
+                        projectId={project.id}
+                        field="backend"
+                        value={project.backend}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-28">
+                      <EditableCell
+                        projectId={project.id}
+                        field="frontend"
+                        value={project.frontend}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-28">
+                      <EditableCell
+                        projectId={project.id}
+                        field="testing"
+                        value={project.testing}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-32">
+                      <EditableCell
+                        projectId={project.id}
+                        field="proposalDate"
+                        value={project.proposalDate}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-32">
+                      <EditableCell
+                        projectId={project.id}
+                        field="launchDate"
+                        value={project.launchDate}
+                        className="text-sm text-gray-600"
+                      />
+                    </td>
+                    
+                    <td className="px-4 py-3 w-24">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>
+                            <Eye className="w-4 h-4 mr-2" />
+                            查看详情
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            添加评论
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <History className="w-4 h-4 mr-2" />
+                            变更记录
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            删除项目
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 
@@ -680,8 +636,9 @@ const ProjectOverview: React.FC = () => {
       <div className="mt-6 text-sm text-gray-500">
         共 {filteredProjects.length} 个项目
         {searchTerm && ` · 搜索"${searchTerm}"`}
-        {statusFilter !== 'all' && ` · 状态：${statusFilter}`}
-        {priorityFilter !== 'all' && ` · 优先级：${priorityFilter}`}
+        {statusFilter.length > 0 && ` · 状态：${statusFilter.join(', ')}`}
+        {priorityFilter.length > 0 && ` · 优先级：${priorityFilter.join(', ')}`}
+        {selectedKRs.length > 0 && ` · KR：${selectedKRs.length}个`}
       </div>
     </div>
   );
